@@ -285,3 +285,44 @@ module.exports = new GraphQLSchema({
     })
 })
 ```
+
+
+## [graphql-helpers](https://github.com/depop/graphql-helpers)
+
+### Outline
+
+Build individual GraphQL types from the familiar GraphQL Definition Language, whilst co-locating your resolve functions with the types. Designed so that it can be adopted incrementally. Provides a small set of generic resolver functions to cover common use cases.
+
+#### Example
+
+Visit the project repository for more thorough examples.
+
+```javascript
+import { GraphQLSchema } from 'graphql';
+import { Registry } from 'graphql-helpers';
+
+const registry = new Registry();
+
+registry.create(`
+  type BlogEntry {
+    id: ID!
+    title: String
+    slug: String
+    content: String
+  }
+`;
+
+registry.create(`
+  type Query {
+    blogEntry(slug: String!): BlogEntry
+    blogEntries: [BlogEntry]
+  }
+`, {
+  blogEntry: /* resolver */,
+  blogEntries: /* resolver */,
+};
+
+const schema = new GraphQLSchema({
+  query: registry.getType('Query'),
+});
+```
