@@ -3,6 +3,129 @@ A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 
 ___
 
+## [gestalt](https://github.com/charlieschwabacher/gestalt)
+
+### Outline
+
+Gestalt will generate a schema with database backed resolution based on type definitions written
+in the GraphQL schema definition language.  The schema language is a
+[proposed](https://github.com/facebook/graphql/pull/90) addition to the GraphQL spec and
+is already used in the [documentation](http://graphql.org/docs/typesystem/).
+
+Gestalt has an interface for pluggable database adapters, but at the moment the only adapter is
+for PostgresQL.
+
+### Example
+
+The following snippet of GraphQL would be all that it takes to define a working API and database
+schema for a twitter like app.
+
+```graphql
+type User implements Node {
+  email: String! @hidden @unique
+  passwordHash String! @hidden
+  firstName: String
+  lastName: String
+  posts: Post @relationship(path: "=AUTHORED=>")
+  followedUsers: User @relationship(path: "=FOLLOWED=>")
+  followers: User @relationship(path: "<=FOLLOWED=")
+  feed: Post @relationship(path: "=FOLLOWED=>User=AUTHORED=>")
+}
+type Post implements Node {
+  text: String
+  author: User @relationship(path: "<-AUTHORED-")
+}
+```
+
+The `@hidden` directive on `email` and `passwordHash` marks fields that should result in database
+columns, but not be exposed in the GraphQL schema.  The `@unique` column on `email` results in a
+uniqueness constraint in the database.
+
+The `@relationship` directives  provide the information needed to create a database schema
+and efficient queries for resolution.  The syntax of the path strings is inspired by
+[Neo4j](//github.com/neo4j/neo4j)'s Cypher query language.
+
+This arrow syntax has three parts - the label `AUTHORED`, the direction of
+the arrow `in` or `out`, and a cardinality ('singular' or 'plural') based on the
+`-` or `=` characters.
+
+Arrows with identical labels and types at their head and tail are matched, and
+the combination of their cardinalities determines how the relationship between
+their types will be stored in the database.
+
+For the schema above, Gestalt is able to tell that it should add a `authored_by_user_id`
+column to the `posts` table for the `User AUTHORED Post` relationship, and a `user_followed_user`
+join table for the `User FOLLOWED User` relationship.
+
+For the plural relationships, gestalt will also create relay connection types `UsersConnection`
+and `PostsConnection`, and update the `posts`, `followedUsers`, `followers`, and `feed`
+fields.
+
+We can serve our API like this:
+
+```
+import gestaltServer from 'gestalt-server';
+import gestaltPostgres from 'gestalt-postgres';
+
+const app = express();
+
+app.use('/graphql', gestaltServer({
+  schemaPath: `${__dirname}/schema.graphql`,
+  database: gestaltPostgres({
+    databaseURL: 'postgres://localhost'
+  }),
+  objects: [], // this array would include any custom resolution definitions
+  mutations: [], // this array would include mutation definitions
+  secret: '!',
+}));
+
+app.listen(3000);
+```
+
+Or get a GraphQLSchema object like this:
+
+```
+import fs from 'fs';
+import gestaltGraphQL from 'gestalt-graphql';
+import gestaltPostgres from 'gestalt-postgres';
+
+const schemaText = fs.readFileSync(`${__dirname}/schema.graphql`);
+
+const {schema} = gestaltGraphQL(
+  schemaText,
+  [], // this array would include any custom resolution definitions for objects
+  [], // this array would include mutation definitions
+  gestaltPostgres({
+    databaseURL: 'postgres://localhost',
+  }),
+);
+```
+
+If we wanted a `fullName` field on `User` that concatenated a user's first and last names, we
+could add it to the schema like so.
+
+```graphql
+type User implements Node {
+  firstName: String
+  lastName: String
+  fullName: String @virtual
+}
+```
+
+The `@virtual` directive will prevent it from resulting in a database column, and we could
+create an object defining resolution like this:
+
+```javascript
+export default {
+  name: 'User',
+  fields: {
+    // calculate user's first name from first and last names
+    fullName: obj => `${obj.firstName} ${obj.lastName}`,
+  },
+}
+```
+
+
 ## [json-to-graphql](https://github.com/Aweary/json-to-graphql)
 
 ### Outline
