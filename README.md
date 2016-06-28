@@ -1,7 +1,14 @@
 # graphql-syntax
 A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 
-___
+**Table of Contents**
+
+- [graphql-syntax](#)
+	- [gestalt](#)
+	- [json-to-graphql](#)
+	- [graphql-helpers](#)
+
+(generated with [DocToc](http://doctoc.herokuapp.com/))
 
 ## [gestalt](https://github.com/charlieschwabacher/gestalt)
 
