@@ -7,8 +7,6 @@ A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 - [json-to-graphql](#json-to-graphql)
 - [graphql-helpers](#graphql-helpers)
 
-(generated with [DocToc](http://doctoc.herokuapp.com/))
-
 ## [gestalt](https://github.com/charlieschwabacher/gestalt)
 
 ### Outline
