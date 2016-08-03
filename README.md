@@ -4,10 +4,11 @@ A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 **Table of Contents**
 
 - [gestalt](#gestalt)
-- [json-to-graphql](#json-to-graphql)
 - [graphql-helpers](#graphql-helpers)
+- [json-to-graphql](#json-to-graphql)
 - [modelizr](#modelizr)
 - [ts2gql](#ts2gql)
+
 
 ## [gestalt](https://github.com/charlieschwabacher/gestalt)
 
@@ -172,7 +173,7 @@ var data = {
   "description": "Create GraphQL schema from JSON files and APIs",
   "fork": false,
   }
-  
+
 var schema = generateSchema(data)
 console.log(schema)
 
