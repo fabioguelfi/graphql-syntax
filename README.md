@@ -506,17 +506,50 @@ schema {
 
 ## [graphql-tools](https://github.com/apollostack/graphql-tools)
 
-GraphQL Tools provides a set of useful tools for manipulation GraphQL.js schemas. The main component is a set of functions that let you quickly create an executable GraphQL schema from GraphQL schema language. It also contains functionality that makes standing up a mock GraphQL server as easy as writing a GraphQL schema.
+Documentation: [docs.apollostack.com](http://docs.apollostack.com/graphql-tools/).
 
-GraphQL Tools has extensive documentation on [docs.apollostack.com](http://docs.apollostack.com/graphql-tools/).
+Tutorial for mocking: [medium.com/apollo-stack](https://medium.com/apollo-stack/mocking-your-server-with-just-one-line-of-code-692feda6e9cd)
 
-### Example usage:
+GraphQL Tools provides a set of useful tools for manipulating GraphQL.js schemas and mocking GraphQL servers. The main component is a set of functions that let you quickly create an executable GraphQL schema from GraphQL schema language. It also contains functionality that makes standing up a mock GraphQL server as easy as writing a GraphQL schema.
 
+### Example usage
+
+This code will create a server which returns a mock person when queried.
+
+All of the functionality demonstrated here can also be used separately (check out the examples in the documentation).
 ```js
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { makeExecutableSchema, addMockFunctionsToSchema } from 'graphql-tools';
-import { Schema, Mocks, Resolvers } from './data';
+
+const Schema = `
+ type Person {
+   id: ID!
+   name: String
+   age: Int
+ }
+
+ type Query {
+   findPerson(id: ID!): Person
+ }
+
+ schema {
+   query: Query
+ }
+`;
+
+const Resolvers = {
+  Query: {
+    findPerson(root, { id }){
+      // here you would write the code that returns an actual person object
+      // but since we're using mocks, you don't have to.
+    },
+  },
+};
+
+// if given an empty object, the default mock functions will be used.
+// for how to override the default mocks, see the documentation or tutorial. 
+const Mocks = {};
 
 const GRAPHQL_PORT = 3000;
 const graphQLServer = express();
@@ -530,7 +563,7 @@ const executableSchema = makeExecutableSchema({
 addMockFunctionsToSchema({
   schema: executableSchema,
   mocks: Mocks,
-  preserveResolvers: true,
+  preserveResolvers: false,
 });
 
 graphQLServer.use('/graphql', graphqlHTTP({
