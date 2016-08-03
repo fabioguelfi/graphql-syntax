@@ -5,6 +5,7 @@ A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 
 - [gestalt](#gestalt)
 - [graphql-helpers](#graphql-helpers)
+- [graphql-tools](#graphql-tools)
 - [json-to-graphql](#json-to-graphql)
 - [modelizr](#modelizr)
 - [ts2gql](#ts2gql)
@@ -501,4 +502,40 @@ schema {
   query: QueryRoot
 }
 
+```
+
+## [graphql-tools](https://github.com/apollostack/graphql-tools)
+
+GraphQL Tools provides a set of useful tools for manipulation GraphQL.js schemas. The main component is a set of functions that let you quickly create an executable GraphQL schema from GraphQL schema language. It also contains functionality that makes standing up a mock GraphQL server as easy as writing a GraphQL schema.
+
+GraphQL Tools has extensive documentation on [docs.apollostack.com](http://docs.apollostack.com/graphql-tools/).
+
+### Example usage:
+
+```js
+import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { makeExecutableSchema, addMockFunctionsToSchema } from 'graphql-tools';
+import { Schema, Mocks, Resolvers } from './data';
+
+const GRAPHQL_PORT = 3000;
+const graphQLServer = express();
+
+const executableSchema = makeExecutableSchema({
+  typeDefs: Schema,
+  resolvers: Resolvers,
+  connectors: Connectors,
+});
+
+addMockFunctionsToSchema({
+  schema: executableSchema,
+  mocks: Mocks,
+  preserveResolvers: true,
+});
+
+graphQLServer.use('/graphql', graphqlHTTP({
+  schema: executableSchema,
+}));
+
+graphQLServer.listen(GRAPHQL_PORT);
 ```
