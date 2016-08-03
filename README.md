@@ -548,7 +548,7 @@ const Resolvers = {
 };
 
 // if given an empty object, the default mock functions will be used.
-// for how to override the default mocks, see the documentation or tutorial. 
+// for how to override the default mocks, see the documentation or tutorial.
 const Mocks = {};
 
 const GRAPHQL_PORT = 3000;
@@ -557,7 +557,6 @@ const graphQLServer = express();
 const executableSchema = makeExecutableSchema({
   typeDefs: Schema,
   resolvers: Resolvers,
-  connectors: Connectors,
 });
 
 addMockFunctionsToSchema({
