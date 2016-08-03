@@ -7,6 +7,7 @@ A catalog of different packages and syntaxes to generate a GraphQL-JS schema
 - [json-to-graphql](#json-to-graphql)
 - [graphql-helpers](#graphql-helpers)
 - [modelizr](#modelizr)
+- [ts2gql](#ts2gql)
 
 ## [gestalt](https://github.com/charlieschwabacher/gestalt)
 
@@ -403,3 +404,100 @@ This will generate the following query and make a request using it.
 ### Documentation
 
 All documentation is located at [julienvincent.github.io/modelizr](http://julienvincent.github.io/modelizr)
+
+## [ts2gql](https://github.com/convoyinc/ts2gql)
+
+Converts a collection of TypeScript interfaces into GraphQL's IDL.
+
+### What can I use this for?
+
++ Easily generating your GraphQL server's schema from an existing TypeScript type hierarchy.
++ Keeping your GraphQL schema in sync with your TypeScript interfaces.
+
+### What does it look like?
+
+`input.ts`
+```ts
+/** @graphql ID */
+export type Id = string;
+
+export type Url = string;
+
+export interface User {
+  id: Id;
+  name: string;
+  photo: Url;
+}
+
+export interface PostContent {
+  title: string;
+  body: string;
+}
+
+export interface Post extends PostContent {
+  id: Id;
+  postedAt: Date;
+  author: User;
+}
+
+export interface Category {
+  id: Id;
+  name: string;
+  posts: Post[];
+}
+
+export interface QueryRoot {
+  users(args: {id: Id}): User[]
+  posts(args: {id: Id, authorId: Id, categoryId: Id}): Post[]
+  categories(args: {id: Id}): Category[]
+}
+
+/** @graphql schema */
+export interface Schema {
+  query: QueryRoot;
+}
+```
+
+```
+> ts2gql input.ts
+
+scalar Date
+
+scalar Url
+
+type User {
+  id: ID
+  name: String
+  photo: Url
+}
+
+interface PostContent {
+  body: String
+  title: String
+}
+
+type Post {
+  author: User
+  body: String
+  id: ID
+  postedAt: Date
+  title: String
+}
+
+type Category {
+  id: ID
+  name: String
+  posts(authorId: ID): [Post]
+}
+
+type QueryRoot {
+  categories(id: ID): [Category]
+  posts(id: ID, authorId: ID, categoryId: ID): [Post]
+  users(id: ID): [User]
+}
+
+schema {
+  query: QueryRoot
+}
+
+```
